@@ -147,16 +147,14 @@ class LeafNode extends BPlusNode {
     @Override
     public LeafNode get(DataBox key) {
         // TODO(proj2): implement
-
-        return null;
+        return this;
     }
 
     // See BPlusNode.getLeftmostLeaf.
     @Override
     public LeafNode getLeftmostLeaf() {
         // TODO(proj2): implement
-
-        return null;
+        return this;
     }
 
     // See BPlusNode.put.
@@ -376,8 +374,23 @@ class LeafNode extends BPlusNode {
         // Note: LeafNode has two constructors. To implement fromBytes be sure to
         // use the constructor that reuses an existing page instead of fetching a
         // brand new one.
+        Page page = bufferManager.fetchPage(treeContext, pageNum);
+        Buffer buffer = page.getBuffer();
 
-        return null;
+        byte nodeType = buffer.get();
+        assert(nodeType == (byte) 1);
+
+        long slibling = buffer.getLong();
+
+        int n = buffer.getInt();
+        List<DataBox> keys = new ArrayList<>();
+        List<RecordId> rids = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            keys.add(DataBox.fromBytes(buffer, metadata.getKeySchema()));
+            rids.add(RecordId.fromBytes(buffer));
+        }
+
+        return new LeafNode(metadata, bufferManager, page, keys, rids, Optional.of(slibling), treeContext);
     }
 
     // Builtins ////////////////////////////////////////////////////////////////

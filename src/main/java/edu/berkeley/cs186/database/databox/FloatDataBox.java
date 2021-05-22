@@ -14,7 +14,9 @@ public class FloatDataBox extends DataBox {
     }
 
     @Override
-    public TypeId getTypeId() { return TypeId.FLOAT; }
+    public TypeId getTypeId() {
+        return TypeId.FLOAT;
+    }
 
     @Override
     public float getFloat() {
@@ -45,7 +47,7 @@ public class FloatDataBox extends DataBox {
 
     @Override
     public int hashCode() {
-        return new Float(f).hashCode();
+        return Float.valueOf(f).hashCode();
     }
 
     @Override

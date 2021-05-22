@@ -14,7 +14,9 @@ public class LongDataBox extends DataBox {
     }
 
     @Override
-    public TypeId getTypeId() { return TypeId.LONG; }
+    public TypeId getTypeId() {
+        return TypeId.LONG;
+    }
 
     @Override
     public long getLong() {
@@ -45,7 +47,7 @@ public class LongDataBox extends DataBox {
 
     @Override
     public int hashCode() {
-        return new Long(l).hashCode();
+        return Long.valueOf(l).hashCode();
     }
 
     @Override

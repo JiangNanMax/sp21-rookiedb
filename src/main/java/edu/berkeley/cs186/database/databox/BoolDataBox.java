@@ -13,7 +13,9 @@ public class BoolDataBox extends DataBox {
     public Type type() { return Type.boolType(); }
 
     @Override
-    public TypeId getTypeId() { return TypeId.BOOL; }
+    public TypeId getTypeId() {
+        return TypeId.BOOL;
+    }
 
     @Override
     public boolean getBool() {

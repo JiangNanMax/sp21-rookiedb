@@ -14,7 +14,9 @@ public class IntDataBox extends DataBox {
     }
 
     @Override
-    public TypeId getTypeId() { return TypeId.INT; }
+    public TypeId getTypeId() {
+        return TypeId.INT;
+    }
 
     @Override
     public int getInt() {
@@ -45,7 +47,7 @@ public class IntDataBox extends DataBox {
 
     @Override
     public int hashCode() {
-        return new Integer(i).hashCode();
+        return Integer.valueOf(i).hashCode();
     }
 
     @Override

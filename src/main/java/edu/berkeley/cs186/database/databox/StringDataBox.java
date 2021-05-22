@@ -34,7 +34,9 @@ public class StringDataBox extends DataBox {
     }
 
     @Override
-    public TypeId getTypeId() { return TypeId.STRING; }
+    public TypeId getTypeId() {
+        return TypeId.STRING;
+    }
 
     @Override
     public String getString() {
