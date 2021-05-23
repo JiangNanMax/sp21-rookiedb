@@ -1,5 +1,6 @@
 package edu.berkeley.cs186.database.index;
 
+import edu.berkeley.cs186.database.Database;
 import edu.berkeley.cs186.database.common.Buffer;
 import edu.berkeley.cs186.database.common.Pair;
 import edu.berkeley.cs186.database.concurrency.LockContext;
@@ -114,8 +115,8 @@ class LeafNode extends BPlusNode {
     LeafNode(BPlusTreeMetadata metadata, BufferManager bufferManager, List<DataBox> keys,
              List<RecordId> rids, Optional<Long> rightSibling, LockContext treeContext) {
         this(metadata, bufferManager, bufferManager.fetchNewPage(treeContext, metadata.getPartNum()),
-             keys, rids,
-             rightSibling, treeContext);
+                keys, rids,
+                rightSibling, treeContext);
     }
 
     /**
@@ -161,7 +162,17 @@ class LeafNode extends BPlusNode {
     @Override
     public Optional<Pair<DataBox, Long>> put(DataBox key, RecordId rid) {
         // TODO(proj2): implement
+        if (keys.size() < metadata.getOrder() * 2) {
+            int index = InnerNode.numLessThan(key, keys);
+            if (key.compareTo(keys.get(index)) != 0) {
+                keys.add(index, key);
+                rids.add(index, rid);
+                return Optional.of(new Pair<>(key, rid.getPageNum()));
+            }
+            sync();
+        } else {
 
+        }
         return Optional.empty();
     }
 
@@ -178,7 +189,14 @@ class LeafNode extends BPlusNode {
     @Override
     public void remove(DataBox key) {
         // TODO(proj2): implement
-
+        // Do not forget to call sync() when implementing the two mutating methods (put and remove)
+        // it's easy to forget.
+        // if changed -> sync()
+        if (keys.contains(key)) {
+            rids.remove(keys.indexOf(key));
+            keys.remove(key);
+            sync();
+        }
         return;
     }
 
@@ -380,7 +398,7 @@ class LeafNode extends BPlusNode {
         byte nodeType = buffer.get();
         assert(nodeType == (byte) 1);
 
-        long slibling = buffer.getLong();
+        long sibling = buffer.getLong();
 
         int n = buffer.getInt();
         List<DataBox> keys = new ArrayList<>();
@@ -390,7 +408,7 @@ class LeafNode extends BPlusNode {
             rids.add(RecordId.fromBytes(buffer));
         }
 
-        return new LeafNode(metadata, bufferManager, page, keys, rids, Optional.of(slibling), treeContext);
+        return new LeafNode(metadata, bufferManager, page, keys, rids, Optional.of(sibling), treeContext);
     }
 
     // Builtins ////////////////////////////////////////////////////////////////
