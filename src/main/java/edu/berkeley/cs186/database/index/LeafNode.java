@@ -162,18 +162,45 @@ class LeafNode extends BPlusNode {
     @Override
     public Optional<Pair<DataBox, Long>> put(DataBox key, RecordId rid) {
         // TODO(proj2): implement
-        if (keys.size() < metadata.getOrder() * 2) {
-            int index = InnerNode.numLessThan(key, keys);
-            if (key.compareTo(keys.get(index)) != 0) {
+        int d = metadata.getOrder();
+        int index = InnerNode.numLessThan(key, keys);
+        if (keys.size() < d * 2) {
+            if (keys.isEmpty() || index == keys.size()) {
+                keys.add(key);
+                rids.add(rid);
+            } else if (key.compareTo(keys.get(index)) != 0) {
                 keys.add(index, key);
                 rids.add(index, rid);
-                return Optional.of(new Pair<>(key, rid.getPageNum()));
+            } else {
+                throw new BPlusTreeException("the key already exists.");
             }
             sync();
+            return Optional.empty();
         } else {
+            if (index < d * 2 && key.compareTo(keys.get(index)) == 0) {
+                throw new BPlusTreeException("the key already exists.");
+            }
+            keys.add(index, key);
+            rids.add(index, rid);
 
+            List<DataBox> leftNodeKeys, rightNodeKeys;
+            List<RecordId> leftNodeRids, rightNodeRids;
+
+            leftNodeKeys = keys.subList(0, d);
+            rightNodeKeys = keys.subList(d, d * 2 + 1);
+            leftNodeRids = rids.subList(0, d);
+            rightNodeRids = rids.subList(d, d * 2 + 1);
+
+            LeafNode rightNode = new LeafNode(metadata, bufferManager, rightNodeKeys, rightNodeRids, rightSibling, treeContext);
+
+            keys = leftNodeKeys;
+            rids = leftNodeRids;
+            long pageNum = rightNode.getPage().getPageNum();
+            rightSibling = Optional.of(pageNum);
+            sync();
+
+            return Optional.of(new Pair<>(rightNodeKeys.get(0), pageNum));
         }
-        return Optional.empty();
     }
 
     // See BPlusNode.bulkLoad.
