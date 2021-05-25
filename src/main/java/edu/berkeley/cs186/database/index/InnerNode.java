@@ -98,7 +98,22 @@ class InnerNode extends BPlusNode {
     @Override
     public Optional<Pair<DataBox, Long>> put(DataBox key, RecordId rid) {
         // TODO(proj2): implement
+        BPlusNode childNode = getChild(numLessThanEqual(key, keys));
+        Optional<Pair<DataBox, Long>> ans = childNode.put(key, rid);
+        if (ans.isPresent()) {
+            DataBox splitKey = ans.get().getFirst();
+            int index = numLessThanEqual(splitKey, keys);
+            keys.add(index, splitKey);
+            children.add(index + 1, ans.get().getSecond());
+            int d = metadata.getOrder();
+            if (keys.size() > d * 2) {
+                splitKey = keys.get(d);
 
+                List<DataBox> leftNodeKeys = keys.subList(0, d);
+//                List<>
+
+            }
+        }
         return Optional.empty();
     }
 
