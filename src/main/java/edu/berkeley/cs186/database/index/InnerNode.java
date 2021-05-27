@@ -117,10 +117,10 @@ class InnerNode extends BPlusNode {
 
                 keys = leftNodeKeys;
                 children = leftNodeChildren;
+                sync();
 
                 return Optional.of(new Pair<>(splitKey, newInnerNode.getPage().getPageNum()));
             }
-            sync();
         }
         sync();
         return Optional.empty();
@@ -139,8 +139,9 @@ class InnerNode extends BPlusNode {
     @Override
     public void remove(DataBox key) {
         // TODO(proj2): implement
-        int index = numLessThan(key, keys);
-        getChild(index).remove(key);
+        // 没必要再走一遍get的逻辑
+        // 直接使用get
+        get(key).remove(key);
     }
 
     // Helpers /////////////////////////////////////////////////////////////////

@@ -260,7 +260,9 @@ class LeafNode extends BPlusNode {
 
     /** Returns the right sibling of this leaf, if it has one. */
     Optional<LeafNode> getRightSibling() {
-        if (!rightSibling.isPresent()) {
+        // 注意toByte中的处理！
+        // 这里还需要判断是否为-1!!!
+        if (!rightSibling.isPresent() || rightSibling.get() <= 0) {
             return Optional.empty();
         }
 
