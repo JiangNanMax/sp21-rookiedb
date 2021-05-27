@@ -257,15 +257,7 @@ public class BPlusTree {
         // Use the provided updateRoot() helper method to change
         // the tree's root if the old root splits.
         Optional<Pair<DataBox, Long>> ans = root.put(key, rid);
-        if (ans.isPresent()) {
-            List<DataBox> newKeys = new ArrayList<>();
-            newKeys.add(ans.get().getFirst());
-            List<Long> newChildren = new ArrayList<>();
-            newChildren.add(root.getPage().getPageNum());
-            newChildren.add(ans.get().getSecond());
-            InnerNode newRoot = new InnerNode(metadata, bufferManager, newKeys, newChildren, lockContext);
-            updateRoot(newRoot);
-        }
+        updateRootHelper(ans);
     }
 
     /**
@@ -293,7 +285,23 @@ public class BPlusTree {
         // Note: You should NOT update the root variable directly.
         // Use the provided updateRoot() helper method to change
         // the tree's root if the old root splits.
-        Optional<Pair<DataBox, Long>> ans = root.bulkLoad(data, fillFactor);
+
+        // 这边没看清上面的要求，需要先判断是否为空树
+        // bulkLoad方法只能在空树中使用
+        LeafNode leftmostLeaf = root.getLeftmostLeaf();
+        if (leftmostLeaf != this.root || leftmostLeaf.scanAll().hasNext()) {
+            throw new BPlusTreeException("tree is not empty");
+        }
+
+        // 而且这里也需要进行循环
+        // 下层InnerNode可能出现分裂后直接返回，但是还没迭代完，所以这里也得循环
+        while (data.hasNext()) {
+            Optional<Pair<DataBox, Long>> ans = root.bulkLoad(data, fillFactor);
+            updateRootHelper(ans);
+        }
+    }
+
+    private void updateRootHelper(Optional<Pair<DataBox, Long>> ans) {
         if (ans.isPresent()) {
             List<DataBox> newKeys = new ArrayList<>();
             newKeys.add(ans.get().getFirst());
